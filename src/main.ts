@@ -6,10 +6,28 @@
 // you need to create an adapter
 import * as utils from '@iobroker/adapter-core';
 
-// Load your modules here, e.g.:
-// import * as fs from "fs";
+// Load your modules here
+import puppeteer from 'puppeteer';
+import fs from 'fs';
+import pdf from 'pdf-parse';
+
+// Types
+interface Subpoint {
+    key: string;
+    value: string;
+}
+
+interface Section {
+    header: string;
+    subpoints: Subpoint[];
+}
+
+interface JSONOutput {
+    content: Section[];
+}
 
 class WeishauptNwpmN extends utils.Adapter {
+    private taskInterval: NodeJS.Timeout | null = null;
 
     public constructor(options: Partial<utils.AdapterOptions> = {}) {
         super({
@@ -17,10 +35,168 @@ class WeishauptNwpmN extends utils.Adapter {
             name: 'weishaupt_nwpm-n',
         });
         this.on('ready', this.onReady.bind(this));
-        this.on('stateChange', this.onStateChange.bind(this));
+        // this.on('stateChange', this.onStateChange.bind(this));
         // this.on('objectChange', this.onObjectChange.bind(this));
         // this.on('message', this.onMessage.bind(this));
         this.on('unload', this.onUnload.bind(this));
+    }
+
+    private async scrapeAndSavePDF(url: string, outputPath: string = 'page.pdf'): Promise<void> {
+        const browser = await puppeteer.launch();
+        const page = await browser.newPage();
+
+        await page.goto(url, {
+            waitUntil: 'networkidle2' // ensures the page is fully loaded
+        });
+
+        await page.pdf({
+            path: outputPath,
+            format: 'A4',
+            printBackground: true
+        });
+
+        console.log(`PDF saved to ${outputPath}`);
+        await browser.close();
+    }
+
+    async convertPDFtoJSON(pdfPath = 'page.pdf'): Promise<void> {
+
+        const dataBuffer = fs.readFileSync(pdfPath);
+
+        const data = await pdf(dataBuffer);
+
+        // Define the specific headers we're interested in
+        const validHeaders = [
+            'heating circuit 1',
+            'domestic hot water',
+            'solar storage',
+            'heat pump'
+        ];
+
+        // Specific parameters to be added under the 'general' category
+        const generalParams = [
+            'external temperature',
+            'flow temperature',
+            'heating request',
+            'performance level'
+        ];
+
+        // This will hold the final grouped JSON data
+        const jsonOutput: JSONOutput = {
+            content: []
+        };
+
+        // Temporary variables to track the current header and its key-value pairs
+        let currentHeader: any = null;
+        let currentSubpoints: { key: string; value: string; }[] = [];
+
+        // Create a 'general' section for the specified parameters
+        const generalSection = {
+            header: 'general',
+            subpoints: []
+        };
+
+        // Process the text content, split by new lines, and trim any unnecessary spaces
+        const lines = data.text
+            .split('\n')
+            .map((line: string) => line.trim())
+            .filter((line: string | any[]) => line.length > 0);
+
+        // Loop through each line to categorize headers and subpoints
+        lines.forEach((line: string) => {
+            // Check if the line matches a valid header
+            if (validHeaders.includes(line)) {
+                // If a valid header is found, push the previous header's data (if any) to the JSON
+                if (currentHeader) {
+                    jsonOutput.content.push({
+                        header: currentHeader,
+                        subpoints: currentSubpoints
+                    });
+                }
+
+                // Start a new valid header and reset subpoints
+                currentHeader = line;
+                currentSubpoints = [];
+            } else if (generalParams.some(param => line.includes(param))) {
+                // If the line contains one of the general parameters, add it to the 'general' section
+                const match = line.match(/([a-zA-Z\s]+)(\d+(\.\d+)?)/);
+                if (match) {
+                    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                    // @ts-expect-error
+                    generalSection.subpoints.push({
+                        key: match[1].trim(),
+                        value: match[2].trim()
+                    });
+                }
+            } else {
+                // Otherwise, this is a subpoint (e.g., "temperature21.9°C")
+                const match = line.match(/([a-zA-Z\s]+)(\d+(\.\d+)?)/);
+                if (match) {
+                    currentSubpoints.push({
+                        key: match[1].trim(),
+                        value: match[2].trim()
+                    });
+                }
+            }
+        });
+
+        // After the loop, add the 'general' section (if it has data)
+        if (generalSection.subpoints.length > 0) {
+            jsonOutput.content.push(generalSection);
+        }
+
+        // After the loop, add the last section (if any)
+        if (currentHeader) {
+            jsonOutput.content.push({
+                header: currentHeader,
+                subpoints: currentSubpoints
+            });
+        }
+
+        for (const category in jsonOutput.content) {
+            //console.debug(jsonOutput.content[category]);
+            console.log(jsonOutput.content[category]['header']);
+            await this.setObjectNotExistsAsync(jsonOutput.content[category]['header'], {
+                type: 'channel',
+                common: {
+                    name: jsonOutput.content[category]['header'],
+                },
+                native: {},
+            });
+
+            for (const value in jsonOutput.content[category]['subpoints']) {
+                console.log(jsonOutput.content[category]['subpoints'][value]['key']);
+                console.log(jsonOutput.content[category]['subpoints'][value]['value']);
+                await this.setObjectNotExistsAsync(jsonOutput.content[category]['header'] + '.' + jsonOutput.content[category]['subpoints'][value]['key'], {
+                    type: 'state',
+                    common: {
+                        role: 'text',
+                        name: jsonOutput.content[category]['subpoints'][value]['key'],
+                        type: 'string',
+                        read: true,
+                        write: false,
+                    },
+                    native: {},
+                });
+                this.setStateAsync(jsonOutput.content[category]['header'] + '.' + jsonOutput.content[category]['subpoints'][value]['key'], jsonOutput.content[category]['subpoints'][value]['value'])
+            }
+        }
+        return;
+    }
+
+    private async scrape_operating_data(): Promise<void> {
+        this.log.info('scrape');
+        await this.scrapeAndSavePDF(this.config.url + '/http/index/j_operatingdata.html');
+        await this.convertPDFtoJSON();
+    }
+
+    /**
+     * @private
+     * This is the main method with scrapes the website
+     */
+    private async scrapeNWPMN(): Promise<void> {
+        this.log.info('scrape');
+        await this.scrape_operating_data();
     }
 
     /**
@@ -34,53 +210,20 @@ class WeishauptNwpmN extends utils.Adapter {
 
         // The adapters config (in the instance object everything under the attribute "native") is accessible via
         // this.config:
-        this.log.info('config option1: ' + this.config.option1);
-        this.log.info('config option2: ' + this.config.option2);
-
-        /*
-        For every state in the system there has to be also an object of type state
-        Here a simple template for a boolean variable named "testVariable"
-        Because every adapter instance uses its own unique namespace variable names can't collide with other adapters variables
-        */
-        await this.setObjectNotExistsAsync('testVariable', {
-            type: 'state',
-            common: {
-                name: 'testVariable',
-                type: 'boolean',
-                role: 'indicator',
-                read: true,
-                write: true,
-            },
-            native: {},
-        });
-
-        // In order to get state updates, you need to subscribe to them. The following line adds a subscription for our variable we have created above.
-        this.subscribeStates('testVariable');
-        // You can also add a subscription for multiple states. The following line watches all states starting with "lights."
-        // this.subscribeStates('lights.*');
-        // Or, if you really must, you can also watch all states. Don't do this if you don't need to. Otherwise this will cause a lot of unnecessary load on the system:
-        // this.subscribeStates('*');
-
-        /*
-            setState examples
-            you will notice that each setState will cause the stateChange event to fire (because of above subscribeStates cmd)
-        */
-        // the variable testVariable is set to true as command (ack=false)
-        await this.setStateAsync('testVariable', true);
-
-        // same thing, but the value is flagged "ack"
-        // ack should be always set to true if the value is received from or acknowledged from the target system
-        await this.setStateAsync('testVariable', { val: true, ack: true });
-
-        // same thing, but the state is deleted after 30s (getState will return null afterwards)
-        await this.setStateAsync('testVariable', { val: true, ack: true, expire: 30 });
-
-        // examples for the checkPassword/checkGroup functions
-        let result = await this.checkPasswordAsync('admin', 'iobroker');
-        this.log.info('check user admin pw iobroker: ' + result);
-
-        result = await this.checkGroupAsync('admin', 'admin');
-        this.log.info('check group user admin group admin: ' + result);
+        if (!this.config.url) {
+            this.log.error('please specify a URL');
+            return;
+        }
+        try {
+            new URL(this.config.url);
+            this.log.debug('config url: ' + this.config.url);
+        } catch (_) {
+            this.log.error('yor url is not valid: ' + this.config.url);
+            return;
+        }
+        this.taskInterval = setInterval(() => {
+            this.scrapeNWPMN();
+        }, this.config.interval * 1000);
     }
 
     /**
@@ -88,12 +231,8 @@ class WeishauptNwpmN extends utils.Adapter {
      */
     private onUnload(callback: () => void): void {
         try {
-            // Here you must clear all timeouts or intervals that may still be active
-            // clearTimeout(timeout1);
-            // clearTimeout(timeout2);
-            // ...
-            // clearInterval(interval1);
-
+            if (this.taskInterval)
+                clearInterval(this.taskInterval);
             callback();
         } catch (e) {
             callback();
@@ -115,18 +254,18 @@ class WeishauptNwpmN extends utils.Adapter {
     //     }
     // }
 
-    /**
-     * Is called if a subscribed state changes
-     */
-    private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
-        if (state) {
-            // The state was changed
-            this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
-        } else {
-            // The state was deleted
-            this.log.info(`state ${id} deleted`);
-        }
-    }
+    // /**
+    // * Is called if a subscribed state changes
+    // */
+    // private onStateChange(id: string, state: ioBroker.State | null | undefined): void {
+    //     if (state) {
+    //         // The state was changed
+    //         this.log.info(`state ${id} changed: ${state.val} (ack = ${state.ack})`);
+    //     } else {
+    //         // The state was deleted
+    //         this.log.info(`state ${id} deleted`);
+    //     }
+    // }
 
     // If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
     // /**

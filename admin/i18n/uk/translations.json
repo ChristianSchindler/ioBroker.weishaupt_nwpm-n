@@ -1,5 +1,6 @@
 {
     "weishaupt_nwpm-n adapter settings": "Налаштування адаптера для weishaupt_nwpm-n",
     "option1": "Варіант1",
-    "option2": "Варіант2"
+    "option2": "Варіант2",
+    "Weishaupt_URL": "URL -адреса Weishaupt"
 }

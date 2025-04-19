@@ -2,15 +2,17 @@
     "i18n": true,
     "type": "panel",
     "items": {
-        "option1": {
-            "type": "checkbox",
-            "label": "option1",
+        "url": {
+            "type": "text",
+            "label": "Weishaupt_URL",
             "newLine": true
         },
-        "option2": {
-            "type": "text",
-            "label": "option2",
-            "newLine": true
+        "interval": {
+            "type": "number",
+            "label": "interval in sec",
+            "newLine": true,
+            "min": 10,
+            "max": 3600
         }
     }
 }
