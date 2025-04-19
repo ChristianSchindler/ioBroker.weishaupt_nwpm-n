@@ -1,0 +1,112 @@
+{
+    "common": {
+        "name": "weishaupt_nwpm-n",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "uk": "Початкова версія",
+                "zh-cn": "首次出版"
+            }
+        },
+        "titleLang": {
+            "en": "Weishaupt NWPM-N",
+            "de": "WeisHupt nwpm-n",
+            "ru": "Weishaupt NWPM-N",
+            "pt": "Weishaupt nwpm-n",
+            "nl": "Weishaupt nwpm-n",
+            "fr": "Weishaupt nwpm-n",
+            "it": "Weishaupt nwpm-n",
+            "es": "Weishaupt nwpm-n",
+            "pl": "Weishaupt NWPM-N",
+            "uk": "Weishaupt NWPM-N",
+            "zh-cn": "Weishaupt NWPM-N"
+        },
+        "desc": {
+            "en": "This is an Iobroker adapter for the Weishaupt heat pumps manager with NWPM-N Ethernet extension module NWP-M",
+            "de": "Dies handelt",
+            "ru": "Это адаптер iobroker для менеджера Weishaupt Heat Pumps с NWPM-N Ethernet модуль NWP-M NWP-M",
+            "pt": "Este é um adaptador iobroker para o Weishaupt Heat Pumps Manager com o módulo de extensão Ethernet NWPM-N NWP-M",
+            "nl": "Dit is een iobroker-adapter voor de Weishaupt-manager van de warmtepompen met NWPM-N Ethernet Extension Module NWP-M",
+            "fr": "Ceci est un adaptateur IOBroker pour le gestionnaire de pompes à chaleur Weishaupt avec le module d'extension Ethernet NWPM-N NWP-M",
+            "it": "Questo è un adattatore IoBroker per il gestore delle pompe di calore Weishaupt con NWPM-N Ethernet Extension Module NWP-M",
+            "es": "Este es un adaptador Iobroker para el administrador de bombas de calor de Weishaupt con el módulo de extensión de Ethernet NWPM-N",
+            "pl": "To jest adapter IOBRoker dla Weishaupt Heat Pumps Manager z modułem rozszerzenia NWPM-N Ethernet NWP-M",
+            "uk": "Це адаптер iobroker для менеджера теплових насосів Weishaupt з модулем розширення NWPM-N Ethernet NWP-M",
+            "zh-cn": "这是weishaupt热泵经理的iobroker适配器，搭配NWPM-N以太网扩展模块NWP-M"
+        },
+        "authors": [
+            "Christian Schindler <schindler.christ@gmail.com>"
+        ],
+        "keywords": [
+            "Weishaupt",
+            "NWPM-N"
+        ],
+        "licenseInformation": {
+            "type": "free",
+            "license": "GPL-3.0"
+        },
+        "platform": "Javascript/Node.js",
+        "icon": "weishaupt_nwpm-n.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/ChristianSchindler/ioBroker.weishaupt_nwpm-n/main/admin/weishaupt_nwpm-n.png",
+        "readme": "https://github.com/ChristianSchindler/ioBroker.weishaupt_nwpm-n/blob/main/README.md",
+        "loglevel": "info",
+        "tier": 3,
+        "mode": "schedule",
+        "allowInit": true,
+        "type": "climate-control",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "adminUI": {
+            "config": "json"
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=6.0.11"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": "7.0.23"
+            }
+        ]
+    },
+    "native": {
+        "option1": true,
+        "option2": "42"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Device or service connected",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
+}

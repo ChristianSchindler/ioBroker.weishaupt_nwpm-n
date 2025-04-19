@@ -1,0 +1,44 @@
+{
+    "cli": true,
+    "target": "directory",
+    "adapterName": "weishaupt_nwpm-n",
+    "title": "Weishaupt NWPM-N",
+    "description": "This is an Iobroker adapter for the Weishaupt heat pumps manager with NWPM-N Ethernet extension module NWP-M",
+    "keywords": [
+        "Weishaupt",
+        "NWPM-N"
+    ],
+    "contributors": [
+        "Christian Schindler"
+    ],
+    "expert": "yes",
+    "features": [
+        "adapter"
+    ],
+    "adminFeatures": [],
+    "type": "climate-control",
+    "startMode": "schedule",
+    "scheduleStartOnChange": "yes",
+    "connectionType": "local",
+    "dataSource": "poll",
+    "connectionIndicator": "yes",
+    "language": "TypeScript",
+    "nodeVersion": "18",
+    "adminUi": "json",
+    "tools": [
+        "ESLint"
+    ],
+    "releaseScript": "yes",
+    "devServer": "no",
+    "indentation": "Space (4)",
+    "quotes": "single",
+    "authorName": "Christian Schindler",
+    "authorGithub": "ChristianSchindler",
+    "authorEmail": "schindler.christ@gmail.com",
+    "gitRemoteProtocol": "SSH",
+    "gitCommit": "yes",
+    "defaultBranch": "main",
+    "license": "GNU GPLv3",
+    "dependabot": "yes",
+    "creatorVersion": "2.6.5"
+}
