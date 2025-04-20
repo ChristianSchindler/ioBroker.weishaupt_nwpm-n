@@ -1,6 +1,6 @@
 {
   "name": "iobroker.weishaupt_nwpm-n",
-  "version": "0.0.3-alpha.2",
+  "version": "0.0.3-alpha.3",
   "description": "This is an Iobroker adapter for the Weishaupt heat pumps manager with NWPM-N Ethernet extension module NWP-M",
   "author": {
     "name": "Christian Schindler",

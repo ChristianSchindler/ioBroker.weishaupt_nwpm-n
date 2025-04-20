@@ -38,7 +38,7 @@ class WeishauptNwpmN extends utils.Adapter {
   async scrapeAndSavePDF(url, outputPath = "page.pdf") {
     const browser = await import_puppeteer.default.launch({
       headless: true,
-      args: ["--lang=de"]
+      args: ["--lang=en"]
     });
     const page = await browser.newPage();
     await page.goto(url, {
@@ -57,16 +57,16 @@ class WeishauptNwpmN extends utils.Adapter {
     const dataBuffer = import_fs.default.readFileSync(pdfPath);
     const data = await (0, import_pdf_parse.default)(dataBuffer);
     const validHeaders = [
-      "1.Heizkreis",
-      "Warmwasser",
-      "Solarspeicher",
-      "W\xE4rmepumpe"
+      "heating circuit 1",
+      "domestic hot water",
+      "solar storage",
+      "heat pump"
     ];
     const generalParams = [
-      "Aussentemperatur",
-      "Vorlauftemperatur",
-      "Anforderung",
-      "Leistungsstufe"
+      "external temperature",
+      "flow temperature",
+      "heating request",
+      "performance level"
     ];
     const jsonOutput = {
       content: []

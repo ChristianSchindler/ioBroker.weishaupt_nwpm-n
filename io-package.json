@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "weishaupt_nwpm-n",
-    "version": "0.0.3-alpha.2",
+    "version": "0.0.3-alpha.3",
     "news": {
+      "0.0.3-alpha.3": {
+        "en": "initial release",
+        "de": "erstausstrahlung",
+        "ru": "первоначальное освобождение",
+        "pt": "lançamento inicial",
+        "nl": "eerste release",
+        "fr": "libération initiale",
+        "it": "rilascio iniziale",
+        "es": "liberación inicial",
+        "pl": "początkowe zwolnienie",
+        "uk": "початковий реліз",
+        "zh-cn": "初步释放"
+      },
       "0.0.3-alpha.2": {
         "en": "initial release",
         "de": "erstausstrahlung",
