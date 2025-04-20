@@ -42,7 +42,10 @@ class WeishauptNwpmN extends utils.Adapter {
     }
 
     private async scrapeAndSavePDF(url: string, outputPath: string = 'page.pdf'): Promise<void> {
-        const browser = await puppeteer.launch();
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--lang=en']
+        });
         const page = await browser.newPage();
 
         await page.goto(url, {
