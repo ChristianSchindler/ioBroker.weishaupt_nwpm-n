@@ -55,7 +55,7 @@ class WeishauptNwpmN extends utils.Adapter {
             printBackground: true
         });
 
-        console.log(`PDF saved to ${outputPath}`);
+        this.log.info(`PDF saved to ${outputPath}`);
         await browser.close();
     }
 
@@ -155,7 +155,7 @@ class WeishauptNwpmN extends utils.Adapter {
 
         for (const category in jsonOutput.content) {
             //console.debug(jsonOutput.content[category]);
-            console.log(jsonOutput.content[category]['header']);
+            this.log.info(jsonOutput.content[category]['header']);
             await this.setObjectNotExistsAsync(jsonOutput.content[category]['header'], {
                 type: 'channel',
                 common: {
@@ -165,8 +165,8 @@ class WeishauptNwpmN extends utils.Adapter {
             });
 
             for (const value in jsonOutput.content[category]['subpoints']) {
-                console.log(jsonOutput.content[category]['subpoints'][value]['key']);
-                console.log(jsonOutput.content[category]['subpoints'][value]['value']);
+                this.log.info(jsonOutput.content[category]['subpoints'][value]['key']);
+                this.log.info(jsonOutput.content[category]['subpoints'][value]['value']);
                 await this.setObjectNotExistsAsync(jsonOutput.content[category]['header'] + '.' + jsonOutput.content[category]['subpoints'][value]['key'], {
                     type: 'state',
                     common: {
