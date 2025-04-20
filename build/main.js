@@ -36,7 +36,10 @@ class WeishauptNwpmN extends utils.Adapter {
     this.on("unload", this.onUnload.bind(this));
   }
   async scrapeAndSavePDF(url, outputPath = "page.pdf") {
-    const browser = await import_puppeteer.default.launch();
+    const browser = await import_puppeteer.default.launch({
+      headless: true,
+      args: ["--lang=en"]
+    });
     const page = await browser.newPage();
     await page.goto(url, {
       waitUntil: "networkidle2"
