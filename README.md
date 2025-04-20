@@ -107,7 +107,7 @@ For later updates, the above procedure is not necessary. Just do the following:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### 0.0.3-alpha.2 (2025-04-20)
+### **WORK IN PROGRESS**
 * (Christian Schindler) initial release
 
 ## License

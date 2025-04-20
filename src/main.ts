@@ -44,7 +44,7 @@ class WeishauptNwpmN extends utils.Adapter {
     private async scrapeAndSavePDF(url: string, outputPath: string = 'page.pdf'): Promise<void> {
         const browser = await puppeteer.launch({
             headless: true,
-            args: ['--lang=de']
+            args: ['--lang=en']
         });
         const page = await browser.newPage();
 
@@ -70,20 +70,19 @@ class WeishauptNwpmN extends utils.Adapter {
 
         // Define the specific headers we're interested in
         const validHeaders = [
-            '1.Heizkreis',
-            'Warmwasser',
-            'Solarspeicher',
-            'Wärmepumpe'
+            'heating circuit 1',
+            'domestic hot water',
+            'solar storage',
+            'heat pump'
         ];
 
         // Specific parameters to be added under the 'general' category
         const generalParams = [
-            'Aussentemperatur',
-            'Vorlauftemperatur',
-            'Anforderung',
-            'Leistungsstufe'
+            'external temperature',
+            'flow temperature',
+            'heating request',
+            'performance level'
         ];
-
         // This will hold the final grouped JSON data
         const jsonOutput: JSONOutput = {
             content: []
